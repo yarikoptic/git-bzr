@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'fileutils'
-EXPORT_LOCATION = "~/.bazaar/plugins/fastimport/exporters/bzr-fast-export.py"
-PYTHON = ENV["PYTHON"] || "/opt/local/bin/python2.5"
+EXPORT_LOCATION = "~/.bazaar/plugins/fastimport/exporters/bzr-fast-export"
+PYTHON = ENV["PYTHON"] || "/usr/bin/python2.5"
 
 command = ARGV.shift
 commands = [:add, :push, :fetch, :pull]
