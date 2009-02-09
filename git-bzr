@@ -8,7 +8,7 @@ function perror() {
 command=$1
 
 if [ "x$command" == "x" ] ; then
-#commands=[:add, :push, :fetch, :pull]
+# FIXME: commands=[:add, :push, :fetch, :pull]
 # the second condition should be && $1 not in @commands
   echo "Usage: git bzr2 [COMMAND] [OPTIONS]"
   echo "Commands: add, push, fetch, pull"
@@ -75,7 +75,9 @@ function fetch() {
          --git-branch=bzr/${remote} ${location} \
          | git fast-import --export-marks=${git_map}
       git branch -D tmp >/dev/null 2>&1
-      git checkout -q -t -b master "bzr/$remote"
+      # TODO: not sure whether I shouldn't make special pull
+      # command which does fetch and the following.
+      #git checkout -q -t -b master "bzr/$remote"
   elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
       echo "Updating remote ${remote}"
       old_rev="$(git rev-parse bzr/${remote})"
