@@ -71,7 +71,7 @@ function fetch() {
       echo "There doesn't seem to be an existing refmap. "
       echo "Doing an initial import"
       mkdir -p "$(dirname $git_map)"
-      bzr-fast-export --export-marks=${bzr_map} \
+      bzr fast-export --export-marks=${bzr_map} \
          --git-branch=bzr/${remote} ${location} \
          | git fast-import --export-marks=${git_map}
       git branch -D tmp >/dev/null 2>&1
@@ -81,7 +81,7 @@ function fetch() {
   elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
       echo "Updating remote ${remote}"
       old_rev="$(git rev-parse bzr/${remote})"
-      bzr-fast-export --import-marks=${bzr_map} \
+      bzr fast-export --import-marks=${bzr_map} \
             --export-marks=${bzr_map} --git-branch=bzr/${remote} ${location} \
          | git fast-import --quiet --export-marks=${git_map} \
             --import-marks=${git_map}
