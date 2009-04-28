@@ -84,7 +84,6 @@ function fetch() {
         bzr fast-export --export-marks=${bzr_map} \
             --git-branch=bzr/${remote} ${location} \
             | git fast-import --export-marks=${git_map}
-        git branch -D tmp >/dev/null 2>&1
     elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
         echo "Updating remote ${remote}"
         old_rev="$(git rev-parse bzr/${remote})"
