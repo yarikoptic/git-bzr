@@ -1,9 +1,4 @@
 #!/bin/bash
-#set -x
-
-#  Better fail completely if something goes wrong + fail if a variable is not
-#  defined
-set -eu
 
 function perror() {
     echo "$@" >&2
