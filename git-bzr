@@ -6,8 +6,6 @@ function perror() {
 
 
 if [ $# -lt 1 ] ; then
-    # FIXME: commands=[:add, :push, :fetch, :pull]
-    # the second condition should be && $1 not in @commands
     echo "Usage: git bzr2 [COMMAND] [OPTIONS]"
     echo "Commands: add, push, fetch, pull"
     exit 1
@@ -36,7 +34,7 @@ function add() {
         perror "There is alread a bazaar branch with that name"
         exit
     fi
-    if [ \! -d "${location}/.bzr" ] ; then
+    if [ ! -d "${location}/.bzr" ] ; then
         perror "Remote is not a bazaar repository"
         exit
     fi
@@ -87,9 +85,6 @@ function fetch() {
             --git-branch=bzr/${remote} ${location} \
             | git fast-import --export-marks=${git_map}
         git branch -D tmp >/dev/null 2>&1
-        # TODO: not sure whether I shouldn't make special pull
-        # command which does fetch and the following.
-        #git checkout -q -t -b master "bzr/$remote"
     elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
         echo "Updating remote ${remote}"
         old_rev="$(git rev-parse bzr/${remote})"
