@@ -6,16 +6,16 @@
 set -eu
 
 function perror() {
- echo "$@" >&2
+    echo "$@" >&2
 }
 
 
 if [ $# -lt 1 ] ; then
-# FIXME: commands=[:add, :push, :fetch, :pull]
-# the second condition should be && $1 not in @commands
-  echo "Usage: git bzr2 [COMMAND] [OPTIONS]"
-  echo "Commands: add, push, fetch, pull"
-  exit 1
+    # FIXME: commands=[:add, :push, :fetch, :pull]
+    # the second condition should be && $1 not in @commands
+    echo "Usage: git bzr2 [COMMAND] [OPTIONS]"
+    echo "Commands: add, push, fetch, pull"
+    exit 1
 fi
 
 command=$1
@@ -34,16 +34,16 @@ function add() {
         exit 1
     fi
     if [ -n "$(git remote show | grep -q \"$name\")" ] ; then
-      perror "There is already a remote with that name"
-      exit
+        perror "There is already a remote with that name"
+        exit
     fi
     if [ -n "$(git config git-bzr.${name}.url)" ] ; then
-      perror "There is alread a bazaar branch with that name"
-      exit
+        perror "There is alread a bazaar branch with that name"
+        exit
     fi
     if [ \! -d "${location}/.bzr" ] ; then
-      perror "Remote is not a bazaar repository"
-      exit
+        perror "Remote is not a bazaar repository"
+        exit
     fi
 
     git config "git-bzr.${name}.location" "$location"
@@ -67,87 +67,87 @@ function get_location() {
 }
 
 function fetch() {
-   if [ $# -lt 1 ] ; then
-       echo "At least the name of the remote is needed for fetch"
-       exit 1
-   fi
-   remote=$1
-   shift
-   args=$@
-   if [ -z "${remote}${args}" ] ; then
-      perror "Usage: git bzr fetch branchname"
-      exit
-   fi
-   get_location "$remote"
-   location=$return
+    if [ $# -lt 1 ] ; then
+        echo "At least the name of the remote is needed for fetch"
+        exit 1
+    fi
+    remote=$1
+    shift
+    args=$@
+    if [ -z "${remote}${args}" ] ; then
+        perror "Usage: git bzr fetch branchname"
+        exit
+    fi
+    get_location "$remote"
+    location=$return
 
-   git_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
-   bzr_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
+    git_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
+    bzr_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
 
-   if [ ! -f "$git_map" -a ! -f "$bzr_map" ] ; then
-      echo "There doesn't seem to be an existing refmap. "
-      echo "Doing an initial import"
-      mkdir -p "$(dirname $git_map)"
-      bzr fast-export --export-marks=${bzr_map} \
-         --git-branch=bzr/${remote} ${location} \
-         | git fast-import --export-marks=${git_map}
-      git branch -D tmp >/dev/null 2>&1
-      # TODO: not sure whether I shouldn't make special pull
-      # command which does fetch and the following.
-      #git checkout -q -t -b master "bzr/$remote"
-  elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
-      echo "Updating remote ${remote}"
-      old_rev="$(git rev-parse bzr/${remote})"
-      bzr fast-export --import-marks=${bzr_map} \
+    if [ ! -f "$git_map" -a ! -f "$bzr_map" ] ; then
+        echo "There doesn't seem to be an existing refmap. "
+        echo "Doing an initial import"
+        mkdir -p "$(dirname $git_map)"
+        bzr fast-export --export-marks=${bzr_map} \
+            --git-branch=bzr/${remote} ${location} \
+            | git fast-import --export-marks=${git_map}
+        git branch -D tmp >/dev/null 2>&1
+        # TODO: not sure whether I shouldn't make special pull
+        # command which does fetch and the following.
+        #git checkout -q -t -b master "bzr/$remote"
+    elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
+        echo "Updating remote ${remote}"
+        old_rev="$(git rev-parse bzr/${remote})"
+        bzr fast-export --import-marks=${bzr_map} \
             --export-marks=${bzr_map} --git-branch=bzr/${remote} ${location} \
-         | git fast-import --quiet --export-marks=${git_map} \
+            | git fast-import --quiet --export-marks=${git_map} \
             --import-marks=${git_map}
-      new_rev="$(git rev-parse bzr/${remote})"
-      echo "Changes since last update:"
-      git shortlog ${old_rev}..${new_rev}
-   else
-      perror "One of the mapfiles is missing! Something went wrong!"
-      exit 1
-   fi
+        new_rev="$(git rev-parse bzr/${remote})"
+        echo "Changes since last update:"
+        git shortlog ${old_rev}..${new_rev}
+    else
+        perror "One of the mapfiles is missing! Something went wrong!"
+        exit 1
+    fi
 }
 
 function push() {
-   if [ $# -lt 1 ] ; then
-       echo "At least the name of the remote is needed for push"
-       exit 1
-   fi
-   remote=$1
-   shift
-   args=$@
+    if [ $# -lt 1 ] ; then
+        echo "At least the name of the remote is needed for push"
+        exit 1
+    fi
+    remote=$1
+    shift
+    args=$@
 
-   if [ -z "${remote}${args}" ] ; then
-      perror "Usage: git bzr push branchname"
-      exit
-   fi
-   get_location "$remote"
-   location=$return
+    if [ -z "${remote}${args}" ] ; then
+        perror "Usage: git bzr push branchname"
+        exit
+    fi
+    get_location "$remote"
+    location=$return
 
-   if [ -n "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^>/ p')" ] ; then
-      perror "HEAD is not a strict child of {remote}, cannot push. Merge first"
-      exit
-   fi
+    if [ -n "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^>/ p')" ] ; then
+        perror "HEAD is not a strict child of {remote}, cannot push. Merge first"
+        exit
+    fi
 
-   if [ -z "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^</ p')" ] ; then
-      perror "Nothing to push. Commit something first"
-      exit
-   fi
+    if [ -z "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^</ p')" ] ; then
+        perror "Nothing to push. Commit something first"
+        exit
+    fi
 
-   git_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
-   bzr_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
+    git_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
+    bzr_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
 
-   if [ ! -f "$git_map" -o ! -f  "$bzr_map" ] ; then
-      perror "We do not have refmapping yet. Then how can I push?"
-      exit
-   fi
+    if [ ! -f "$git_map" -o ! -f  "$bzr_map" ] ; then
+        perror "We do not have refmapping yet. Then how can I push?"
+        exit
+    fi
 
-   git fast-export --import-marks=$git_map --export-marks=$git_map HEAD \
-      | (cd $location \
-         && bzr fast-import --import-marks=$bzr_map --export-marks=$bzr_map -)
+    git fast-export --import-marks=$git_map --export-marks=$git_map HEAD \
+        | (cd $location \
+        && bzr fast-import --import-marks=$bzr_map --export-marks=$bzr_map -)
 }
 
 function run() {
@@ -156,8 +156,8 @@ function run() {
     args="$@"
 
     if [ -n "$(git rev-parse)" ] ; then
-      perror "Must be inside a git repository to work"
-      exit 1
+        perror "Must be inside a git repository to work"
+        exit 1
     fi
     up=$(git rev-parse --show-cdup)
     if [ "x$up" == "x" ] ; then
