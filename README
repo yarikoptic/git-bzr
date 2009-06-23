@@ -1,11 +1,12 @@
 git-bzr: a bidirectional git - bazaar gateway
----------
+=============================================
 
-## What does it do?
+This script allows you to add bazaar repositories as git branches in your
+git repository. After that, you can fetch the Bazaar repo, make some
+changes, and push it back into Bazaar.
 
-This script allows you to add bazaar repositories as git branches in your git repository. After that, you can fetch the Bazaar repo, make some changes, and push it back into Bazaar.
-
-## How does it work?
+Usage
+-----
 
 An example session goes like this:
 
@@ -16,18 +17,24 @@ An example session goes like this:
   $ Hack hack, merge merge....
   $ git bzr push upstream
 
-## How should I install it?
+Installation
+------------
 
 You need a new Git (v 1.6.0 or higher).
 
-Furthermore, you need the Bazaar fastimport plugin. It can be found at https://launchpad.net/bzr-fastimport.
+Furthermore, you need the Bazaar fastimport plugin. It can be found at
+https://launchpad.net/bzr-fastimport; to fetch it, run:
+
+  $ bzr branch lp:bzr-fastimport
 
 Finally, you need to install the git-bzr script somewhere.
 
-## How is it licensed?
+License
+-------
 
 The git-bzr script is licensed under the same license as Git.
 
-## I have a question?
+Contact
+-------
 
-You can try mailing me at frimmirf@gmail.com
+The author of the original git-bzr Ruby implementation is frimmirf@gmail.com.
