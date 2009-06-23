@@ -1,12 +1,14 @@
 #!/bin/bash
+#
+# git-bzr
 
 function perror() {
-    echo "$@" >&2
+    echo "git-bzr: $@" >&2
 }
 
 
 if [ $# -lt 1 ] ; then
-    echo "Usage: git bzr2 [COMMAND] [OPTIONS]"
+    echo "Usage: git bzr [COMMAND] [OPTIONS]"
     echo "Commands: add, push, fetch, pull"
     exit 1
 fi
@@ -31,7 +33,7 @@ function add() {
         exit
     fi
     if [ -n "$(git config git-bzr.${name}.url)" ] ; then
-        perror "There is alread a bazaar branch with that name"
+        perror "There is already a bazaar branch with that name"
         exit
     fi
     if [ ! -d "${location}/.bzr" ] ; then
