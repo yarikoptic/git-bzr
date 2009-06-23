@@ -2,43 +2,64 @@
 #
 # git-bzr
 
+
+function gitbzr_help_all() {
+  echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
+  echo >&2
+  echo >&2 "Usage: git-bzr <command> ..."
+  echo >&2
+  echo >&2 "Commands:"
+  echo >&2
+  echo >&2 "  add                         Add a bzr branch as a remote"
+  echo >&2 "  fetch                       Fetch from bzr into a named branch"
+  echo >&2 "  push                        Push to the tracked bzr branch"
+  echo >&2 "  show                        Print location of a tracked bzr branch"
+  echo >&2
+  echo >&2 "  help                        Display help for a specific command"
+  echo >&2
+  exit 1
+}
+
 function perror() {
     echo "git-bzr: $@" >&2
 }
 
-
 if [ $# -lt 1 ] ; then
-    echo "Usage: git bzr [COMMAND] [OPTIONS]"
-    echo "Commands: add, push, fetch, pull"
-    exit 1
+    gitbzr_help
 fi
 
 command=$1
 
 return=""
 
-function add() {
+function gitbzr_add_help() {
+  echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
+  echo >&2
+  echo >&2 "Usage: git-bzr add <remote> /path/to/bzr/branch"
+  echo >&2
+  exit 1
+}
+
+function gitbzr_add() {
     if [ $# -lt 2 ] ; then
-        echo "Specify the name and location for 'add' command"
-        exit 1
+        gitbzr_add_help
     fi
     name="$1"
     location="$2"
     if [[ -z "$@" ]] ; then
-        perror "Usage: git bzr add name location"
-        exit 1
+        gitbzr_add_help
     fi
     if [ -n "$(git remote show | grep -q \"$name\")" ] ; then
         perror "There is already a remote with that name"
-        exit
+        exit 1
     fi
     if [ -n "$(git config git-bzr.${name}.url)" ] ; then
         perror "There is already a bazaar branch with that name"
-        exit
+        exit 1
     fi
     if [ ! -d "${location}/.bzr" ] ; then
         perror "Remote is not a bazaar repository"
-        exit
+        exit 1
     fi
 
     git config "git-bzr.${name}.location" "$location"
@@ -61,17 +82,40 @@ function get_location() {
     return="$l"
 }
 
-function fetch() {
+function gitbzr_show_help() {
+  echo >&2 "git-bzr show, Print location of a tracked bzr branch"
+  echo >&2
+  echo >&2 "Usage: git-bzr show <remote>"
+  echo >&2
+  exit 1
+}
+
+function gitbzr_show() {
     if [ $# -lt 1 ] ; then
-        echo "At least the name of the remote is needed for fetch"
-        exit 1
+        gitbzr_show_help
+    fi
+    remote=$1
+    get_location "$remote"
+    echo $return
+}
+
+function gitbzr_fetch_help() {
+  echo >&2 "git-bzr fetch, Fetch from bzr into a named branch"
+  echo >&2
+  echo >&2 "Usage: git-bzr fetch <remote>"
+  echo >&2
+  exit 1
+}
+
+function gitbzr_fetch() {
+    if [ $# -lt 1 ] ; then
+        gitbzr_fetch_help
     fi
     remote=$1
     shift
     args=$@
     if [ -z "${remote}${args}" ] ; then
-        perror "Usage: git bzr fetch branchname"
-        exit
+        gitbzr_fetch_help
     fi
     get_location "$remote"
     location=$return
@@ -102,18 +146,24 @@ function fetch() {
     fi
 }
 
-function push() {
+function gitbzr_push_help() {
+  echo >&2 "git-bzr push, Push to the tracked bzr branch"
+  echo >&2
+  echo >&2 "Usage: git-bzr push <remote>"
+  echo >&2
+  exit 1
+}
+
+function gitbzr_push() {
     if [ $# -lt 1 ] ; then
-        echo "At least the name of the remote is needed for push"
-        exit 1
+        gitbzr_push_help
     fi
     remote=$1
     shift
     args=$@
 
     if [ -z "${remote}${args}" ] ; then
-        perror "Usage: git bzr push branchname"
-        exit
+        gitbzr_push_help
     fi
     get_location "$remote"
     location=$return
@@ -141,7 +191,29 @@ function push() {
         && bzr fast-import --import-marks=$bzr_map --export-marks=$bzr_map -)
 }
 
-function run() {
+function gitbzr_help() {
+    cmd=$1
+
+    case $cmd in
+      add )
+        gitbzr_add_help
+        ;;
+      fetch )
+        gitbzr_fetch_help
+        ;;
+      push )
+        gitbzr_push_help
+        ;;
+      show )
+        gitbzr_show_help
+        ;;
+      * )
+        gitbzr_help_all
+        ;;
+    esac
+}
+
+function gitbzr_run() {
     cmd=$1
     shift
     args="$@"
@@ -155,7 +227,26 @@ function run() {
         up="."
     fi
     cd $up
-    eval "$cmd $args"
+    case $cmd in
+      help )
+        gitbzr_help $args
+        ;;
+      add )
+        gitbzr_add $args
+        ;;
+      fetch )
+        gitbzr_fetch $args
+        ;;
+      push )
+        gitbzr_push $args
+        ;;
+      show )
+        gitbzr_show $args
+        ;;
+      * )
+        gitbzr_help
+        ;;
+    esac
 }
 
-run $@
+gitbzr_run $@
