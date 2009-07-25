@@ -24,14 +24,6 @@ function perror() {
     echo "git-bzr: $@" >&2
 }
 
-if [ $# -lt 1 ] ; then
-    gitbzr_help
-fi
-
-command=$1
-
-return=""
-
 function gitbzr_add_help() {
   echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
   echo >&2
@@ -248,5 +240,13 @@ function gitbzr_run() {
         ;;
     esac
 }
+
+if [ $# -lt 1 ] ; then
+    gitbzr_help
+fi
+
+command=$1
+
+return=""
 
 gitbzr_run $@
