@@ -168,7 +168,7 @@ function gitbzr_push() {
     get_location "$remote"
     location=$return
 
-    if [ -n "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^>/ p')" ] ; then
+    if [ -n "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^>/ p')" ] ; then
         perror "HEAD is not a strict child of {remote}, cannot push. Merge first"
         exit
     fi
