@@ -120,8 +120,8 @@ function gitbzr_fetch() {
     get_location "$remote"
     location=$return
 
-    git_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
-    bzr_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
+    git_map=$(readlink $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
+    bzr_map=$(readlink $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
 
     if [ ! -f "$git_map" -a ! -f "$bzr_map" ] ; then
         echo "There doesn't seem to be an existing refmap. "
