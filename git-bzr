@@ -2,6 +2,10 @@
 #
 # git-bzr
 
+gitdir=$(git rev-parse --git-dir)
+if [ $(uname -s) != "Darwin" ]; then
+    gitdir=$(readlink -f $gitdir)
+fi
 
 function gitbzr_help_all() {
   echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
@@ -112,8 +116,8 @@ function gitbzr_fetch() {
     get_location "$remote"
     location=$return
 
-    git_map=$(readlink $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
-    bzr_map=$(readlink $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
+    git_map="$gitdir/bzr-git/${remote}-git-map"
+    bzr_map="$gitdir/bzr-git/${remote}-bzr-map"
 
     if [ ! -f "$git_map" -a ! -f "$bzr_map" ] ; then
         echo "There doesn't seem to be an existing refmap. "
@@ -170,8 +174,8 @@ function gitbzr_push() {
         exit
     fi
 
-    git_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-git-map"
-    bzr_map=$(readlink -f $(git rev-parse --git-dir))"/bzr-git/${remote}-bzr-map"
+    git_map="$gitdir/bzr-git/${remote}-git-map"
+    bzr_map="$gitdir/bzr-git/${remote}-bzr-map"
 
     if [ ! -f "$git_map" -o ! -f  "$bzr_map" ] ; then
         perror "We do not have refmapping yet. Then how can I push?"
