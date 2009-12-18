@@ -57,7 +57,7 @@ function gitbzr_add() {
         perror "There is already a bazaar branch with that name"
         exit 1
     fi
-    if [ ! -d "${location}/.bzr" ] ; then
+    if ! bzr info -q ${location} > /dev/null 2>&1 ; then
         perror "Remote is not a bazaar repository"
         exit 1
     fi
