@@ -3,15 +3,14 @@ import os
 from os.path import join as pjoin, abspath, isdir, isfile, dirname
 import sys
 import subprocess
-from subprocess import call, Popen, PIPE
 
 import argparse
 
 
 def shrun(cmd, ret_error=False, ret_code=False):
-    proc = Popen(cmd,
-                 stdout=PIPE,
-                 stderr=.PIPE,
+    proc = subprocess.Popen(cmd,
+                 stdout=subprocess.PIPE,
+                 stderr=subprocess.PIPE,
                  shell=True)
     (out, err) = proc.communicate()
     if not (ret_error or ret_code):
@@ -24,11 +23,15 @@ def shrun(cmd, ret_error=False, ret_code=False):
     return ret
 
 
+def shcall(cmd):
+    return subprocess.check_call(cmd, shell=True)
+
+
 def add(**args):
     if args['name'] in shrun('git remote show').split("\n"):
         raise OSError("There is already a remote with that name")
-    if shrun('git config git-bzr.%(name)s.url' % args) != "":
-        raise OSError("There is alread a bazaar branch with that name")
+    if shrun('git config git-bzr.%(name)s.location' % args) != "":
+        raise OSError("There is alread a git-bzr branch with that name")
     if not isdir(pjoin(args['location'], ".bzr")):
         raise OSError("%(location)s is not a bazaar repository" % args)
     shrun('git config git-bzr.%(name)s.location %(location)s' % args)
@@ -43,15 +46,17 @@ def fetch(**args):
     if not isfile(git_map) and not isfile(bzr_map):
         print "There doesn't seem to be an existing refmap. "
         print "Doing an initial import"
-        os.makedirs(dirname(git_map))
-        call('(bzr fast-export --export-marks=%(bzr_map)s '
+        map_name = dirname(git_map)
+        if not isdir(map_name):
+            os.makedirs(map_name)
+        shcall('(bzr fast-export --export-marks=%(bzr_map)s '
              '--git-branch=bzr/%(remote)s %(location)s) | '
              '(git fast-import --export-marks=%(git_map)s)'
              % locals())
-    if isfile(git_map) and isfile(bzr_map):
+    elif isfile(git_map) and isfile(bzr_map):
         print 'Updating remote', remote
         old_rev = rev_parse('bzr/%s' % remote)
-        call('(bzr fast-export '
+        shcall('(bzr fast-export '
              '--import-marks=%(bzr_map)s '
              '--export-marks=%(bzr_map)s '
              '--git-branch=bzr/%(remote)s '
@@ -82,7 +87,7 @@ def push(**args):
     if not isfile(git_map) or not isfile(bzr_map):
         raise OSError("We do not have refmapping yet. "
                       "Then how can I push?")
-    call('(git fast-export '
+    shcall('(git fast-export '
          '--import-marks=%(git_map)s '
          '--export-marks=%(git_map)s '
          'HEAD) | '
