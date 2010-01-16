@@ -41,8 +41,12 @@ results in::
    ABORT: exception occurred processing commit :3
    bzr: ERROR: exceptions.KeyError: ':1'
 
-I don't know enough about how this works to understand the error.  I'd
-be happy to hear from y'all.
+I don't know enough about how this works to understand the error.  
+
+There's a bug report from March 2009 describing the problem:
+https://bugs.launchpad.net/bzr-fastimport/+bug/347729
+
+I'd be happy to hear from y'all.
 
 What does it do?
 ----------------

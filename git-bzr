@@ -29,23 +29,28 @@ def fetch(remote):
         map_name = dirname(git_map)
         if not isdir(map_name):
             os.makedirs(map_name)
-        shcall('(bzr fast-export --export-marks=%(bzr_map)s '
-             '--git-branch=bzr/%(remote)s %(location)s) | '
-             '(git fast-import --export-marks=%(git_map)s)'
+        shcall('(bzr fast-export '
+               '--plain '
+               '--export-marks=%(bzr_map)s '
+               '--git-branch=bzr/%(remote)s '
+               '%(location)s) | '
+               '(git fast-import '
+               '--export-marks=%(git_map)s)'
              % locals())
     elif isfile(git_map) and isfile(bzr_map):
         print 'Updating remote', remote
         old_rev = rev_parse('bzr/%s' % remote)
         shcall('(bzr fast-export '
-             '--import-marks=%(bzr_map)s '
-             '--export-marks=%(bzr_map)s '
-             '--git-branch=bzr/%(remote)s '
-             '%(location)s) | '
-             '(git fast-import '
-             '--quiet '
-             '--export-marks=%(git_map)s '
-             '--import-marks=%(git_map)s)'
-             % locals())
+               '--plain '
+               '--import-marks=%(bzr_map)s '
+               '--export-marks=%(bzr_map)s '
+               '--git-branch=bzr/%(remote)s '
+               '%(location)s) | '
+               '(git fast-import '
+               '--quiet '
+               '--export-marks=%(git_map)s '
+               '--import-marks=%(git_map)s)'
+               % locals())
         new_rev = rev_parse('bzr/%s' % remote)
         print "Changes since last update:"
         print shrun('git shortlog %s..%s' % (old_rev, new_rev))
