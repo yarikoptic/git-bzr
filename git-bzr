@@ -5,26 +5,6 @@ import sys
 import subprocess
 
 
-def shrun(cmd, ret_error=False, ret_code=False):
-    proc = subprocess.Popen(cmd,
-                 stdout=subprocess.PIPE,
-                 stderr=subprocess.PIPE,
-                 shell=True)
-    (out, err) = proc.communicate()
-    if not (ret_error or ret_code):
-        return out
-    ret = [out]
-    if ret_error:
-        ret.append(err)
-    if ret_code:
-        ret.append(proc.returncode)
-    return ret
-
-
-def shcall(cmd):
-    return subprocess.check_call(cmd, shell=True)
-
-
 def add(name, location):
     remotes = [r.strip() for r in shrun('git remote show').split('\n')]
     if name in remotes:
@@ -94,6 +74,26 @@ def push(remote):
          'bzr fast-import '
          '--import-marks=%(bzr_map)s '
          '--export-marks=%(bzr_map)s -)' % locals())
+
+
+def shrun(cmd, ret_error=False, ret_code=False):
+    proc = subprocess.Popen(cmd,
+                 stdout=subprocess.PIPE,
+                 stderr=subprocess.PIPE,
+                 shell=True)
+    (out, err) = proc.communicate()
+    if not (ret_error or ret_code):
+        return out
+    ret = [out]
+    if ret_error:
+        ret.append(err)
+    if ret_code:
+        ret.append(proc.returncode)
+    return ret
+
+
+def shcall(cmd):
+    return subprocess.check_call(cmd, shell=True)
 
 
 def get_maps(remote):

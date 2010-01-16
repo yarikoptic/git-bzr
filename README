@@ -1,13 +1,60 @@
 git-bzr: a bidirectional git - bazaar gateway
----------
+---------------------------------------------
 
-## What does it do?
+This is a python version of the original Ruby ``git-bzr`` script, at
+http://github.com/pieter/git-bzr
 
-This script allows you to add bazaar repositories as git branches in your git repository. After that, you can fetch the Bazaar repo, make some changes, and push it back into Bazaar.
+There is also a ``sh`` version at http://github.com/kfish/git-bzr
 
-## How does it work?
+I wrote this python version because I know python well and it was a
+rather quick conversion.  The code and this README file are a direct
+port of the Ruby original, with thanks.
 
-An example session goes like this:
+Does it work?
+-------------
+
+No, not for me - either this version, nor the Ruby original, nor the
+shell script port.  I am using git_ version 1.6.5.2, bzr_ version 2.0.2,
+and the current development version (revision 268) of bzr-fastimport_.
+At least with this combination, trying to push back to a bzr_ repository
+causes a crash with a ``KeyError``::
+
+  mkdir test-git
+  mkdir test-bzr
+  cd test-bzr
+  bzr init
+  echo 'text' > afile
+  bzr add afile
+  bzr commit -m 'A file'
+  cd ..
+  cd test-git
+  git init
+  git bzr add bzr-repo ../test-bzr
+  git bzr fetch bzr-repo
+  git co -b bzr-local bzr/bzr-repo
+  echo 'more text' >> afile
+  git commit -am 'More text'
+  git bzr push bzr-repo
+
+results in::
+
+   ABORT: exception occurred processing commit :3
+   bzr: ERROR: exceptions.KeyError: ':1'
+
+I don't know enough about how this works to understand the error.  I'd
+be happy to hear from y'all.
+
+What does it do?
+----------------
+
+This script should allow you to add bazaar repositories as git branches
+in your git repository. After that, you can fetch the Bazaar repo, make
+some changes, and push it back into Bazaar.
+
+How does it work?
+-----------------
+
+An example session goes like this::
 
   $ git bzr add upstream ../bzr-branch
   $ git bzr fetch upstream
@@ -15,24 +62,22 @@ An example session goes like this:
   $ Hack hack, merge merge....
   $ git bzr push upstream
 
-## How should I install it?
+How should I install it?
+------------------------
 
-You need a new Git (v 1.6.0 or higher). If you have an older Git version, you can get git-bzr to run by applying the patch in this repository to your Git source code.
+You need a newish Git (v 1.6.0 or higher). 
 
-Furthermore, you need the Bazaar fastimport plugin. It can be found at https://launchpad.net/bzr-fastimport.
+Furthermore, you need the Bazaar fastimport plugin - bzr-fastimport_
 
-Finally, you need to install the git-bzr script, which is written in Ruby, somewhere. You will need to edit it a bit to make it work with your paths, as it is really unpolished and probably uses absolute pathnames.
+Finally, you need to install the ``git-bzr`` script, which is written in
+Python, somewhere. 
 
-## Why did you put this online?
+How is it licensed?
+-------------------
 
-I'm not really interested in working on this anymore, as it fulfills my need. However, I can understand someone else might want to try the same, so I put the code online to avoid double work.
+The git-bzr script is licensed under the same license as Git.
 
-NOTE: I really mean what I say here above -- I'm no longer interested in this program. Take it as it is, or look at one of the forks on github (there are two that have converted the script to bash, if you prefer that).
 
-## How is it licensed?
-
-The Git patch is a derivative of the Git source and is thus licensed under Git's license (GPL v2.0 only). The Bazaar fastimport changes are covered under the same license as the rest of the fastimport plugin. The git-bzr script is licensed under the same license as Git.
-
-## I have a question?
-
-You can try mailing me at frimmirf@gmail.com
+.. _git: http://git-scm.com/
+.. _bzr: http://bazaar.canonical.com/
+.. _bzr-fastimport: https://launchpad.net/bzr-fastimpor
