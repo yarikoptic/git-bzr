@@ -4,8 +4,6 @@ from os.path import join as pjoin, abspath, isdir, isfile, dirname
 import sys
 import subprocess
 
-import argparse
-
 
 def shrun(cmd, ret_error=False, ret_code=False):
     proc = subprocess.Popen(cmd,
@@ -27,20 +25,22 @@ def shcall(cmd):
     return subprocess.check_call(cmd, shell=True)
 
 
-def add(**args):
-    if args['name'] in shrun('git remote show').split("\n"):
+def add(name, location):
+    remotes = [r.strip() for r in shrun('git remote show').split('\n')]
+    if name in remotes:
         raise OSError("There is already a remote with that name")
-    if shrun('git config git-bzr.%(name)s.location' % args) != "":
+    if shrun('git config git-bzr.%(name)s.location' % locals()) != "":
         raise OSError("There is alread a git-bzr branch with that name")
-    if not isdir(pjoin(args['location'], ".bzr")):
-        raise OSError("%(location)s is not a bazaar repository" % args)
-    shrun('git config git-bzr.%(name)s.location %(location)s' % args)
+    if not isdir(pjoin(location, ".bzr")):
+        raise OSError("%(location)s is not a bazaar repository" %
+                      locals())
+    shrun('git config git-bzr.%(name)s.location %(location)s' %
+          locals())
     print "Bazaar branch %(name)s added. You can fetch it with " \
-              "`git bzr fetch %(name)s`" % args
+              "`git bzr fetch %(name)s`" % locals()
 
 
-def fetch(**args):
-    remote = args['branchname']
+def fetch(remote):
     location = get_location(remote)
     git_map, bzr_map = get_maps(remote)
     if not isfile(git_map) and not isfile(bzr_map):
@@ -74,8 +74,7 @@ def fetch(**args):
                       "Something went wrong!")
 
 
-def push(**args):
-    remote = args['branchname']
+def push(remote):
     location = get_location(remote)
     lst = shrun('git rev-list --left-right HEAD...bzr/%s' % remote)
     if lst.startswith('>'):
@@ -119,27 +118,9 @@ def get_git_dir():
 
 def rev_parse(arg):
     return shrun('git rev-parse %s' % arg).strip()
-    
 
-def main():
-    # create the base parser with a subparsers argument
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
-    # add a sub-command "add"
-    add_parse = subparsers.add_parser('add')
-    add_parse.add_argument('name')
-    add_parse.add_argument('location')
-    add_parse.set_defaults(func=add)
-    # add sub-commands  "fetch" "push"
-    fetch_parse = subparsers.add_parser('fetch')
-    fetch_parse.add_argument('branchname')
-    fetch_parse.set_defaults(func=fetch)
-    push_parse = subparsers.add_parser('push')
-    push_parse.add_argument('branchname')
-    push_parse.set_defaults(func=push)
-    # parse arguments, run commands
-    args = parser.parse_args()
-    # check we're ok to go
+
+def to_git_root():
     out, code = shrun('git rev-parse', ret_code=True)
     if code != 0:
         raise OSError("Must be inside a git repository to work")
@@ -147,8 +128,35 @@ def main():
     up = rev_parse('--show-cdup')
     if up != '':
         os.chdir(up)
-    # run command
-    args.func(**args.__dict__)
+    
+
+def parse_args(argv, cmds):
+    program = argv.pop(0)
+    cmd_names = cmds.keys()
+    usage = 'Usage: %s {%s}' % (program, ', '.join(cmd_names))
+    if len(argv) == 0:
+        print usage
+        sys.exit()
+    cmd = argv.pop(0)
+    if cmd not in cmd_names:
+        print usage
+        sys.exit()
+    func, req_args = cmds[cmd]
+    if len(argv) != len(req_args):
+        print 'Usage: %s %s %s ' % (program,
+                                    cmd,
+                                    ' '.join(req_args))
+        sys.exit()
+    return func, argv
+
+
+def main():
+    cmds = {'add': (add, ('name', 'location')),
+            'fetch': (fetch, ('branchname',)),
+            'push': (push, ('branchname',))}
+    func, args = parse_args(sys.argv, cmds)
+    to_git_root()
+    func(*args)
 
 
 if __name__ == '__main__':
