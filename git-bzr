@@ -1,23 +1,30 @@
 #!/bin/bash
 #
 # git-bzr
+#
+# Bidirectional operation with Bazaar repositories. Add remote branches, pull
+# from them and push to them using this script.
 
+function gitbzr_help_header() {
+    echo >&2 "git-bzr - Bidirectional operation between Bazaar and git"
+}
 
 function gitbzr_help_all() {
-  echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
-  echo >&2
-  echo >&2 "Usage: git-bzr <command> ..."
-  echo >&2
-  echo >&2 "Commands:"
-  echo >&2
-  echo >&2 "  add                         Add a bzr branch as a remote"
-  echo >&2 "  fetch                       Fetch from bzr into a named branch"
-  echo >&2 "  push                        Push to the tracked bzr branch"
-  echo >&2 "  show                        Print location of a tracked bzr branch"
-  echo >&2
-  echo >&2 "  help                        Display help for a specific command"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Usage: git bzr <command> [arguments]"
+    echo >&2
+    echo >&2 "Commands:"
+    echo >&2
+    echo >&2 "  add                         Add a bzr branch as a remote"
+    echo >&2 "  fetch                       Fetch from bzr into a named branch"
+    echo >&2 "  push                        Push to the tracked bzr branch"
+    echo >&2 "  show                        Print location of a tracked bzr branch"
+    echo >&2 "  help                        Display help for a specific command"
+    echo >&2
+    echo >&2 "Arguments are detailed in each command's help message. For more"
+    echo >&2 "details, use 'git bzr help <command>'"
+    echo >&2
+    exit 1
 }
 
 function perror() {
@@ -25,11 +32,12 @@ function perror() {
 }
 
 function gitbzr_add_help() {
-  echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
-  echo >&2
-  echo >&2 "Usage: git-bzr add <remote> /path/to/bzr/branch"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Add a remote bzr branch to your git repository"
+    echo >&2
+    echo >&2 "Usage: git-bzr add <remote> /path/to/bzr/branch"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_add() {
@@ -75,11 +83,12 @@ function get_location() {
 }
 
 function gitbzr_show_help() {
-  echo >&2 "git-bzr show, Print location of a tracked bzr branch"
-  echo >&2
-  echo >&2 "Usage: git-bzr show <remote>"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Print location of a tracked bzr branch"
+    echo >&2
+    echo >&2 "Usage: git bzr show <remote>"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_show() {
@@ -92,11 +101,13 @@ function gitbzr_show() {
 }
 
 function gitbzr_fetch_help() {
-  echo >&2 "git-bzr fetch, Fetch from bzr into a named branch"
-  echo >&2
-  echo >&2 "Usage: git-bzr fetch <remote>"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Fetch from bzr into a named branch. The branch must have been"
+    echo >&2 "added with 'git bzr add' first."
+    echo >&2
+    echo >&2 "Usage: git bzr fetch <remote>"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_fetch() {
@@ -139,11 +150,12 @@ function gitbzr_fetch() {
 }
 
 function gitbzr_push_help() {
-  echo >&2 "git-bzr push, Push to the tracked bzr branch"
-  echo >&2
-  echo >&2 "Usage: git-bzr push <remote>"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Push to a tracked bzr branch"
+    echo >&2
+    echo >&2 "Usage: git bzr push <remote>"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_push() {
