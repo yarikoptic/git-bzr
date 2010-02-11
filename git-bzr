@@ -22,7 +22,7 @@ function gitbzr_help_all() {
     echo >&2 "  help                        Display help for a specific command"
     echo >&2
     echo >&2 "Arguments are detailed in each command's help message. For more"
-    echo >&2 "details, use 'git bzr help <command>'"
+    echo >&2 "information, use 'git bzr help <command>'"
     echo >&2
     exit 1
 }
@@ -218,22 +218,29 @@ function gitbzr_help() {
 }
 
 function gitbzr_run() {
+    if [ $# -lt 2 ] ; then
+        gitbzr_help $1
+    fi
+
     cmd=$1
     shift
     args="$@"
 
-    if [ -n "$(git rev-parse)" ] ; then
-        perror "Must be inside a git repository to work"
-        exit 1
+    if [ "x$cmd" != "xhelp" ]; then
+        if [ -n "$(git rev-parse)" ] ; then
+            perror "Must be inside a git repository to work"
+            exit 1
+        fi
+        up=$(git rev-parse --show-cdup)
+        if [ "x$up" == "x" ] ; then
+            up="."
+        fi
+        cd $up
     fi
-    up=$(git rev-parse --show-cdup)
-    if [ "x$up" == "x" ] ; then
-        up="."
-    fi
-    cd $up
+
     case $cmd in
       help )
-        gitbzr_help $args
+        gitbzr_help $1
         ;;
       add )
         gitbzr_add $args
@@ -252,12 +259,6 @@ function gitbzr_run() {
         ;;
     esac
 }
-
-if [ $# -lt 1 ] ; then
-    gitbzr_help
-fi
-
-command=$1
 
 return=""
 
