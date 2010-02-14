@@ -17,6 +17,22 @@ An example session goes like this:
   $ Hack hack, merge merge....
   $ git bzr push upstream
 
+bzr URLs
+--------
+
+Note that a bzr URL corresponds to a single bzr branch, and is represented in
+git as a single branch in your repository.
+
+The URL passed to "git bzr add" can be any valid bzr URL, such as:
+
+  * A local filesystem reference
+        git bzr add upstream ../bzr-branch
+  * A remote bzr repository: 
+        git bzr add mega-nerd http://www.mega-nerd.com/Bzr/libsndfile-dev/
+  * A Launchpad URL:
+	git bzr add upstream lp:inkscape
+
+
 Installation
 ------------
 
