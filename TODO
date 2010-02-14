@@ -16,4 +16,8 @@ Add a way to rename remote bzr branches (similar to "git remote rename")
   nb. Using "git branch rm" and "git branch mv" does not update the git-bzr info
   in .git/config, so it would be useful to have a git-bzr specific command that
   keeps that info in sync.
+Add a clone command to make it easier to import a bzr as a git repository from
+  scratch. Simplified workflow for this: mkdir, git init,
+  git bzr add $branch $location, git bzr fetch $branch, git merge $branch.
+  $branch should be chosen automatically.
 
