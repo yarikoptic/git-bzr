@@ -1,0 +1,19 @@
+
+Documentation
+-------------
+
+Add a man page (git-bzr.1) so that "git help bzr" works
+
+Features
+--------
+
+Add a way to show all bzr remote bzr branch names (similar to "git remote show");
+  nb. "git branch" will show bzr remotes as normal git branches, but it would
+  be useful to have a git-bzr option to show only bzr remotes.
+
+Add a way to delete remote bzr branches (similar to "git remote rm")
+Add a way to rename remote bzr branches (similar to "git remote rename")
+  nb. Using "git branch rm" and "git branch mv" does not update the git-bzr info
+  in .git/config, so it would be useful to have a git-bzr specific command that
+  keeps that info in sync.
+
