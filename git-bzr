@@ -238,7 +238,8 @@ function gitbzr_run() {
     args="$@"
 
     if [ "x$cmd" != "xhelp" ]; then
-        if [ -n "$(git rev-parse)" ] ; then
+        git rev-parse 1>/dev/null 2>&1
+        if [ $? -ne 0 ] ; then
             perror "Must be inside a git repository to work"
             exit 1
         fi
