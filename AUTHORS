@@ -1,0 +1,21 @@
+History
+-------
+
+git-bzr was originally implementedin Ruby by frimmirf@gmail.com, and
+improvements were added by Pieter de Bie <pdebie@ai.rug.nl>.
+
+Bash version
+------------
+
+git-bzr was converted to bash by Matej Cepl <mcepl@redhat.com>
+
+Further improvements have been made by:
+
+Yaroslav Halchenko <debian@onerussian.com>
+Jonas Bernoulli <jonas@bernoul.li>
+Conrad Parker <conrad@metadecks.org>
+Yuri Baburov <burchik@gmail.com>
+Gonéri Le Bouder <goneri@rulezlan.org>
+Gisle Aas <gisle@aas.no>
+أحمد المحمودي (Ahmed El-Mahmoudy) <aelmahmoudy@users.sourceforge.net>
+Gabriel Filion <gfilion@revolutionlinux.com>
