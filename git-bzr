@@ -125,6 +125,7 @@ function gitbzr_fetch() {
         mkdir -p "$(dirname $git_map)"
         bzr fast-export --export-marks=${bzr_map} \
             --git-branch=bzr/${remote} ${location} \
+            | sed 's/reset\ refs\/tags\/version\ /reset\ refs\/tags\//' \
             | git fast-import --export-marks=${git_map}
     elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
         echo "Updating remote ${remote}"
