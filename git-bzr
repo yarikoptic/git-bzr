@@ -3,6 +3,8 @@
 # git-bzr
 
 gitdir=$(git rev-parse --git-dir)
+[ -e "$gitdir" ] || exit 1
+
 if [ $(uname -s) != "Darwin" ]; then
     gitdir=$(readlink -f $gitdir)
 fi
