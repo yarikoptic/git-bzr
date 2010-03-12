@@ -1,29 +1,40 @@
 #!/bin/bash
 #
 # git-bzr
+#
+# Bidirectional operation with Bazaar repositories. Add remote branches, pull
+# from them and push to them using this script.
 
-gitdir=$(git rev-parse --git-dir)
-[ -e "$gitdir" ] || exit 1
+function gitbzr_help_header() {
+    echo >&2 "git-bzr - Bidirectional operation between Bazaar and git"
+}
 
-if [ $(uname -s) != "Darwin" ]; then
-    gitdir=$(readlink -f $gitdir)
-fi
+function gitbzr_git_directory() {
+    gitdir=$(git rev-parse --git-dir)
+    [ -e "$gitdir" ] || exit 1
+    if [ $(uname -s) != "Darwin" ]; then
+        gitdir=$(readlink -f $gitdir)
+    fi
+
+    echo $gitdir
+}
 
 function gitbzr_help_all() {
-  echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
-  echo >&2
-  echo >&2 "Usage: git-bzr <command> ..."
-  echo >&2
-  echo >&2 "Commands:"
-  echo >&2
-  echo >&2 "  add                         Add a bzr branch as a remote"
-  echo >&2 "  fetch                       Fetch from bzr into a named branch"
-  echo >&2 "  push                        Push to the tracked bzr branch"
-  echo >&2 "  show                        Print location of a tracked bzr branch"
-  echo >&2
-  echo >&2 "  help                        Display help for a specific command"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Usage: git bzr <command> [arguments]"
+    echo >&2
+    echo >&2 "Commands:"
+    echo >&2
+    echo >&2 "  add                         Add a bzr branch as a remote"
+    echo >&2 "  fetch                       Fetch from bzr into a named branch"
+    echo >&2 "  push                        Push to the tracked bzr branch"
+    echo >&2 "  show                        Print location of a tracked bzr branch"
+    echo >&2 "  help                        Display help for a specific command"
+    echo >&2
+    echo >&2 "Arguments are detailed in each command's help message. For more"
+    echo >&2 "information, use 'git bzr help <command>'"
+    echo >&2
+    exit 1
 }
 
 function perror() {
@@ -31,11 +42,12 @@ function perror() {
 }
 
 function gitbzr_add_help() {
-  echo >&2 "git-bzr, Bidirectional operation between a Bzr repository and git"
-  echo >&2
-  echo >&2 "Usage: git-bzr add <remote> /path/to/bzr/branch"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Add a remote bzr branch to your git repository"
+    echo >&2
+    echo >&2 "Usage: git-bzr add <remote> /path/to/bzr/branch"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_add() {
@@ -81,11 +93,12 @@ function get_location() {
 }
 
 function gitbzr_show_help() {
-  echo >&2 "git-bzr show, Print location of a tracked bzr branch"
-  echo >&2
-  echo >&2 "Usage: git-bzr show <remote>"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Print location of a tracked bzr branch"
+    echo >&2
+    echo >&2 "Usage: git bzr show <remote>"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_show() {
@@ -98,17 +111,20 @@ function gitbzr_show() {
 }
 
 function gitbzr_fetch_help() {
-  echo >&2 "git-bzr fetch, Fetch from bzr into a named branch"
-  echo >&2
-  echo >&2 "Usage: git-bzr fetch <remote>"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Fetch from bzr into a named branch. The branch must have been"
+    echo >&2 "added with 'git bzr add' first."
+    echo >&2
+    echo >&2 "Usage: git bzr fetch <remote>"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_fetch() {
     if [ $# -lt 1 ] ; then
         gitbzr_fetch_help
     fi
+    gitdir=$(gitbzr_git_directory)
     remote=$1
     shift
     args=$@
@@ -126,17 +142,16 @@ function gitbzr_fetch() {
         echo "Doing an initial import"
         mkdir -p "$(dirname $git_map)"
         bzr fast-export --export-marks=${bzr_map} \
-            --git-branch=bzr/${remote} ${location} \
-            | sed 's/reset\ refs\/tags\/version\ /reset\ refs\/tags\//' \
+            --git-branch=${remote} ${location} \
             | git fast-import --export-marks=${git_map}
     elif [ -f "$git_map" -a -f "$bzr_map" ] ; then
         echo "Updating remote ${remote}"
-        old_rev="$(git rev-parse bzr/${remote})"
+        old_rev="$(git rev-parse ${remote})"
         bzr fast-export --import-marks=${bzr_map} \
-            --export-marks=${bzr_map} --git-branch=bzr/${remote} ${location} \
+            --export-marks=${bzr_map} --git-branch=${remote} ${location} \
             | git fast-import --quiet --export-marks=${git_map} \
             --import-marks=${git_map}
-        new_rev="$(git rev-parse bzr/${remote})"
+        new_rev="$(git rev-parse ${remote})"
         echo "Changes since last update:"
         git shortlog ${old_rev}..${new_rev}
     else
@@ -146,17 +161,19 @@ function gitbzr_fetch() {
 }
 
 function gitbzr_push_help() {
-  echo >&2 "git-bzr push, Push to the tracked bzr branch"
-  echo >&2
-  echo >&2 "Usage: git-bzr push <remote>"
-  echo >&2
-  exit 1
+    gitbzr_help_header
+    echo >&2 "Push to a tracked bzr branch"
+    echo >&2
+    echo >&2 "Usage: git bzr push <remote>"
+    echo >&2
+    exit 1
 }
 
 function gitbzr_push() {
     if [ $# -lt 1 ] ; then
         gitbzr_push_help
     fi
+    gitdir=$(gitbzr_git_directory)
     remote=$1
     shift
     args=$@
@@ -167,12 +184,12 @@ function gitbzr_push() {
     get_location "$remote"
     location=$return
 
-    if [ -n "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^>/ p')" ] ; then
+    if [ -n "$(git rev-list --left-right HEAD...$remote | sed -n '/^>/ p')" ] ; then
         perror "HEAD is not a strict child of {remote}, cannot push. Merge first"
         exit
     fi
 
-    if [ -z "$(git rev-list --left-right HEAD...bzr/$remote | sed -n '/^</ p')" ] ; then
+    if [ -z "$(git rev-list --left-right HEAD...$remote | sed -n '/^</ p')" ] ; then
         perror "Nothing to push. Commit something first"
         exit
     fi
@@ -213,22 +230,30 @@ function gitbzr_help() {
 }
 
 function gitbzr_run() {
+    if [ $# -lt 2 ] ; then
+        gitbzr_help $1
+    fi
+
     cmd=$1
     shift
     args="$@"
 
-    if [ -n "$(git rev-parse)" ] ; then
-        perror "Must be inside a git repository to work"
-        exit 1
+    if [ "x$cmd" != "xhelp" ]; then
+        git rev-parse 1>/dev/null 2>&1
+        if [ $? -ne 0 ] ; then
+            perror "Must be inside a git repository to work"
+            exit 1
+        fi
+        up=$(git rev-parse --show-cdup)
+        if [ "x$up" == "x" ] ; then
+            up="."
+        fi
+        cd $up
     fi
-    up=$(git rev-parse --show-cdup)
-    if [ "x$up" == "x" ] ; then
-        up="."
-    fi
-    cd $up
+
     case $cmd in
       help )
-        gitbzr_help $args
+        gitbzr_help $1
         ;;
       add )
         gitbzr_add $args
@@ -247,12 +272,6 @@ function gitbzr_run() {
         ;;
     esac
 }
-
-if [ $# -lt 1 ] ; then
-    gitbzr_help
-fi
-
-command=$1
 
 return=""
 
