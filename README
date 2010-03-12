@@ -13,7 +13,7 @@ An example session goes like this:
   $ git init
   $ git bzr add upstream ../bzr-branch
   $ git bzr fetch upstream
-  $ git checkout -b local_branch bzr/upstream
+  $ git checkout -b local_branch upstream
   $ Hack hack, merge merge....
   $ git bzr push upstream
 
