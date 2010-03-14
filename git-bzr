@@ -7,6 +7,8 @@
 # Bidirectional operation with Bazaar repositories. Add remote branches, pull
 # from them and push to them using this script.
 
+gitbzr_version='1.2'
+
 function gitbzr_help_header() {
     echo >&2 "git-bzr - Bidirectional operation between Bazaar and git"
 }
@@ -36,7 +38,16 @@ function gitbzr_help_all() {
     echo >&2 "Arguments are detailed in each command's help message. For more"
     echo >&2 "information, use 'git bzr help <command>'"
     echo >&2
-    exit 1
+}
+
+function gitbzr_print_version() {
+cat << EOT
+git-bzr (bash version) $gitbzr_version
+Copyright (C) of respective authors (see AUTHORS).
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+EOT
 }
 
 function perror() {
@@ -227,12 +238,24 @@ function gitbzr_help() {
         ;;
       * )
         gitbzr_help_all
+        exit 1
         ;;
     esac
 }
 
 function gitbzr_run() {
     if [ $# -lt 2 ] ; then
+        if [ "x$1" = "x--version" ]; then
+            gitbzr_print_version
+            exit 0
+        elif [ "x$1" = "x--help" ]; then
+            gitbzr_help_all 2>&1
+            exit 0
+        elif [ "x$1" = "x--manpage" ]; then
+            help2man -N $0
+            exit 0
+        fi
+
         gitbzr_help $1
     fi
 
