@@ -2,8 +2,6 @@
 Documentation
 -------------
 
-Add a man page (git-bzr.1) so that "git help bzr" works
-
 Features
 --------
 
